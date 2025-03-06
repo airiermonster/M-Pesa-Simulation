@@ -36,8 +36,49 @@ bool verifyPIN(const UserData &userData) {
         attempts--;
         cout << "Incorrect PIN!" << endl;
     }
-    cout << "Too many incorrect attempts. Please try again later." << endl;
+    cout << "Too many incorrect attempts." << endl;
     return false;
+}
+
+bool recoverPIN(UserData &userData) {
+    if (userData.securityQuestion.empty() || userData.securityAnswer.empty()) {
+        cout << "PIN recovery has not been set up for this account." << endl;
+        return false;
+    }
+    
+    cout << "\n=== PIN Recovery ===" << endl;
+    cout << "Security Question: " << userData.securityQuestion << endl;
+    cout << "Enter your answer: ";
+    
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    string answer;
+    getline(cin, answer);
+    
+    if (answer == userData.securityAnswer) {
+        cout << "Answer correct! Your PIN is: " << userData.pin << endl;
+        
+        // Ask if they want to change their PIN
+        cout << "Would you like to change your PIN? (y/n): ";
+        char choice;
+        cin >> choice;
+        
+        if (tolower(choice) == 'y') {
+            cout << "Enter new PIN: ";
+            int newPin;
+            while (!(cin >> newPin) || cin.peek() != '\n' || newPin < 1000 || newPin > 9999) {
+                cout << "Invalid PIN. Please enter a 4-digit number: ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            userData.pin = newPin;
+            cout << "PIN changed successfully!" << endl;
+        }
+        
+        return true;
+    } else {
+        cout << "Incorrect answer. PIN recovery failed." << endl;
+        return false;
+    }
 }
 
 int main() {
@@ -50,21 +91,37 @@ int main() {
     } else {
         userData = loadUserData();
         if (!verifyPIN(userData)) {
-            return 1;
+            cout << "Would you like to recover your PIN? (y/n): ";
+            char choice;
+            cin >> choice;
+            
+            if (tolower(choice) == 'y') {
+                if (!recoverPIN(userData)) {
+                    cout << "PIN recovery failed. Please try again later." << endl;
+                    return 1;
+                }
+                saveUserData(userData); // Save if PIN was changed
+            } else {
+                cout << "Please try again later." << endl;
+                return 1;
+            }
         }
     }
 
     int choice;
     do {
         choice = displayMenu(userData);
-        if (choice != 8) {
+        if (choice != 13) {
             saveUserData(userData);
             cout << "\nPress Enter to continue...";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cin.get();
+            if (cin.peek() == '\n') {
+                cin.ignore();
+            } else {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
             system("cls");
         }
-    } while (choice != 8);
+    } while (choice != 13);
 
     saveUserData(userData);
     cout << "\nThank you for using M-PESA!" << endl;

@@ -7,6 +7,14 @@
 
 using namespace std;
 
+struct LoanData {
+    int amount;
+    int remainingAmount;
+    string dateTaken;
+    string dueDate;
+    bool isActive;
+};
+
 struct UserData {
     int pin;
     int balance;
@@ -14,7 +22,11 @@ struct UserData {
     string phoneNumber;
     string gender;
     string region;
+    string securityQuestion;
+    string securityAnswer;
     vector<string> transactionHistory;
+    LoanData currentLoan;
+    int creditScore; // 0-100, higher is better
 };
 // Function declarations
 string generateTransactionID();
@@ -37,5 +49,11 @@ void showError(const string &message);
 void showHelp();
 void addMoney(UserData &userData);
 string getCurrentDateTime();
+void generateMiniStatement(const UserData &userData);
+void scheduledPayment(UserData &userData);
+void billPayment(UserData &userData);
+void mobileLoans(UserData &userData);
+void internationalTransfer(UserData &userData);
+void qrPayment(UserData &userData);
 
 #endif
